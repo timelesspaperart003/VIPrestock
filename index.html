@@ -3,393 +3,468 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIP 情境組叫貨週期分析</title>
+<title>VIP 叫貨週期分析</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e2ddd6;--text:#1a1714;--text2:#6b6560;--text3:#9e9993;--accent:#2d6a4f;--accent-light:#e8f5ef;--accent-mid:#74c69d;--warn:#c77a2a;--warn-light:#fdf3e7;--red:#b83232;--red-light:#fdf0f0;--mono:'DM Mono',monospace;--sans:'Noto Sans TC',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
 
-  :root {
-    --bg: #f5f3ef;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: #e2ddd6;
-    --text: #1a1714;
-    --text2: #6b6560;
-    --text3: #9e9993;
-    --accent: #2d6a4f;
-    --accent-light: #e8f5ef;
-    --accent-mid: #74c69d;
-    --warn: #c77a2a;
-    --warn-light: #fdf3e7;
-    --mono: 'DM Mono', monospace;
-    --sans: 'Noto Sans TC', sans-serif;
-  }
+/* ===== LOGIN ===== */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center}
+.login-box h2{font-size:1.2rem;font-weight:700;margin-bottom:.4rem}
+.login-box p{font-size:13px;color:var(--text3);margin-bottom:1.5rem}
+.login-box input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:14px;outline:none;margin-bottom:10px;background:var(--surface)}
+.login-box input:focus{border-color:var(--accent-mid)}
+.login-box button{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer}
+.login-box button:hover{opacity:.9}
+.login-err{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== MAIN ===== */
+#mainScreen{display:none;padding:2rem 1.5rem 4rem}
+header{max-width:960px;margin:0 auto 1.5rem;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-bottom:1.25rem;border-bottom:1.5px solid var(--border)}
+header h1{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+header h1 span{display:block;font-size:.8rem;font-weight:400;color:var(--text3);margin-bottom:4px;font-family:var(--mono)}
+.updated{font-size:11px;color:var(--text3);font-family:var(--mono)}
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 2rem 1.5rem 4rem;
-  }
+/* Tabs */
+.tabs{max-width:960px;margin:0 auto 1.5rem;display:flex;gap:4px;border-bottom:1.5px solid var(--border)}
+.tab{font-size:13px;font-weight:500;padding:7px 18px;border-radius:8px 8px 0 0;cursor:pointer;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s}
+.tab:hover{color:var(--text);background:var(--surface2)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface)}
 
-  header {
-    max-width: 960px;
-    margin: 0 auto 2rem;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1.5px solid var(--border);
-  }
+/* Summary */
+.summary-bar{max-width:960px;margin:0 auto 1.25rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem}
+.metric .lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.metric .val{font-size:1.6rem;font-weight:700;font-family:var(--mono);color:var(--text);letter-spacing:-.03em}
+.metric.clickable{cursor:pointer;transition:box-shadow .15s,transform .1s}
+.metric.clickable:hover{box-shadow:0 2px 10px rgba(0,0,0,.08);transform:translateY(-1px)}
+.metric.clickable.active{border-width:2px;border-color:currentColor}
 
-  header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-  header h1 span {
-    display: block;
-    font-size: 0.8rem;
-    font-weight: 400;
-    color: var(--text3);
-    letter-spacing: 0;
-    margin-bottom: 4px;
-    font-family: var(--mono);
-  }
+/* Controls */
+.controls{max-width:960px;margin:0 auto 1.25rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.controls label{font-size:12px;color:var(--text2);font-weight:500}
+select{font-family:var(--sans);font-size:13px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);cursor:pointer;outline:none}
+select:focus{border-color:var(--accent-mid)}
+.sep{width:1px;height:20px;background:var(--border);margin:0 4px}
 
-  .summary-bar {
-    max-width: 960px;
-    margin: 0 auto 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-  }
-  .metric {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.9rem 1rem;
-  }
-  .metric .lbl {
-    font-size: 11px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
-  }
-  .metric .val {
-    font-size: 1.6rem;
-    font-weight: 700;
-    font-family: var(--mono);
-    color: var(--text);
-    letter-spacing: -0.03em;
-  }
+/* Searchable select */
+.search-select-wrap{position:relative;display:inline-block}
+.search-select-wrap input{font-family:var(--sans);font-size:13px;padding:5px 28px 5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);outline:none;width:200px;cursor:text}
+.search-select-wrap input:focus{border-color:var(--accent-mid)}
+.search-select-wrap::after{content:'▾';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none}
+.search-dropdown{position:absolute;top:calc(100% + 4px);left:0;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;max-height:240px;overflow-y:auto;display:none}
+.search-dropdown.open{display:block}
+.search-option{padding:7px 12px;font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-option:hover,.search-option.selected{background:var(--accent-light);color:var(--accent)}
+.search-option.no-result{color:var(--text3);cursor:default}
+.search-option.no-result:hover{background:transparent}
 
-  .controls {
-    max-width: 960px;
-    margin: 0 auto 1.25rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-  .controls label {
-    font-size: 12px;
-    color: var(--text2);
-    font-weight: 500;
-  }
-  select {
-    font-family: var(--sans);
-    font-size: 13px;
-    padding: 5px 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
-    color: var(--text);
-    cursor: pointer;
-    outline: none;
-  }
-  select:focus { border-color: var(--accent-mid); }
+/* Cards */
+.cards{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow .15s}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card-head{display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.tag-c{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--surface2);color:var(--text2);white-space:nowrap}
+.pname{font-size:14px;font-weight:700;color:var(--text);flex:1;min-width:160px}
+.cbadge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;font-family:var(--mono)}
+.c-hot{background:#fff0e6;color:#b85a00}
+.c-normal{background:var(--accent-light);color:var(--accent)}
+.c-once{background:var(--surface2);color:var(--text3)}
+.total-note{font-size:12px;color:var(--text3);font-family:var(--mono);white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:7px 16px;text-align:left;background:var(--surface2);border-bottom:1px solid var(--border)}
+thead th:nth-child(2),thead th:nth-child(3){text-align:right}
+tbody td{padding:8px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody td:nth-child(2){text-align:right}
+tbody td:nth-child(3){text-align:right}
+.dcel{font-family:var(--mono);font-size:13px}
+.qcell{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.qnum{font-family:var(--mono);font-weight:700;font-size:14px;min-width:28px;text-align:right}
+.bar-wrap{width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:6px;border-radius:3px;background:var(--accent-mid)}
+.gtag{display:inline-block;font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:99px;background:var(--warn-light);color:var(--warn);white-space:nowrap}
+.ftag{font-size:11px;font-family:var(--mono);color:var(--text3)}
 
-  .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+/* Prediction */
+.pred-grid{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.pred-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pred-card.overdue{border-color:#f5c0c0;background:var(--red-light)}
+.pred-card.soon{border-color:#f5d9b0;background:var(--warn-light)}
+.pred-rank{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--text3);min-width:32px}
+.pred-info{flex:1;min-width:160px}
+.pred-customer{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--text2);display:inline-block;margin-bottom:5px}
+.pred-product{font-size:14px;font-weight:700;color:var(--text)}
+.pred-meta{font-size:12px;color:var(--text2);margin-top:3px;font-family:var(--mono)}
+.urgency-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:120px}
+.urgency-bar-bg{width:120px;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.urgency-bar-fill{height:8px;border-radius:4px}
+.urgency-label{font-size:12px;font-weight:700;font-family:var(--mono)}
+.pred-next{font-size:12px;color:var(--text3);font-family:var(--mono);white-space:nowrap}
+.pred-qty{font-size:12px;color:var(--text2);font-family:var(--mono);white-space:nowrap}
 
-  .cards { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: box-shadow 0.15s;
-  }
-  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-
-  .card-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 16px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .tag-customer {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 99px;
-    background: var(--surface2);
-    color: var(--text2);
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
-  .product-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    flex: 1;
-    min-width: 160px;
-  }
-  .cycle-badge {
-    font-size: 12px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 99px;
-    white-space: nowrap;
-    font-family: var(--mono);
-  }
-  .cycle-hot { background: #fff0e6; color: #b85a00; }
-  .cycle-normal { background: var(--accent-light); color: var(--accent); }
-  .cycle-once { background: var(--surface2); color: var(--text3); }
-
-  .total-note {
-    font-size: 12px;
-    color: var(--text3);
-    font-family: var(--mono);
-    white-space: nowrap;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead th {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 7px 16px;
-    text-align: left;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-  thead th:nth-child(2), thead th:nth-child(3) { text-align: right; }
-  tbody td {
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-    color: var(--text);
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody td:nth-child(2) { text-align: right; }
-  tbody td:nth-child(3) { text-align: right; }
-
-  .date-cell {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text);
-  }
-  .qty-cell {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-  .qty-num {
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: 14px;
-    min-width: 28px;
-    text-align: right;
-  }
-  .bar-wrap {
-    width: 80px;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 6px;
-    border-radius: 3px;
-    background: var(--accent-mid);
-    transition: width 0.3s;
-  }
-
-  .gap-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-family: var(--mono);
-    padding: 2px 8px;
-    border-radius: 99px;
-    background: var(--warn-light);
-    color: var(--warn);
-    white-space: nowrap;
-  }
-  .first-tag {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text3);
-  }
-
-  .empty {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text3);
-    font-size: 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-  }
-
-  @media (max-width: 600px) {
-    .bar-wrap { display: none; }
-    .card-head { gap: 7px; }
-    thead th:nth-child(3) { display: none; }
-    tbody td:nth-child(3) { display: none; }
-  }
+/* Loading / utils */
+.loading{max-width:960px;margin:4rem auto;text-align:center;color:var(--text3);font-size:14px}
+.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--accent-mid);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{max-width:960px;margin:2rem auto;padding:1rem 1.25rem;background:var(--warn-light);border:1px solid #f5d9b0;border-radius:10px;font-size:13px;color:var(--warn)}
+.empty{text-align:center;padding:3rem;color:var(--text3);font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.hidden{display:none!important}
+@media(max-width:600px){.bar-wrap{display:none}.card-head{gap:7px}thead th:nth-child(3),tbody td:nth-child(3){display:none}.urgency-wrap{display:none}.search-select-wrap input{width:140px}}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>
-    <span>雋永紙藝 · VIP 出貨單</span>
-    情境組叫貨週期分析
-  </h1>
-  <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">以下單日期計算，拆單已合計</div>
-</header>
-
-<div class="summary-bar" id="sumBar"></div>
-
-<div class="controls">
-  <label>客戶</label>
-  <select id="fC" onchange="render()"><option value="">全部</option></select>
-  <div class="sep"></div>
-  <label>商品</label>
-  <select id="fP" onchange="render()"><option value="">全部</option></select>
-  <div class="sep"></div>
-  <label>顯示</label>
-  <select id="fM" onchange="render()">
-    <option value="all">全部</option>
-    <option value="multi">有週期（多次下單）</option>
-    <option value="once">僅一次下單</option>
-  </select>
+<!-- 登入頁 -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>雋永紙藝</h2>
+    <p>VIP 情境組叫貨分析系統</p>
+    <input type="password" id="pwInput" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">登入</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
 </div>
 
-<div class="cards" id="cards"></div>
+<!-- 主畫面 -->
+<div id="mainScreen">
+  <header>
+    <h1><span>雋永紙藝 · VIP 出貨單</span>叫貨週期分析</h1>
+    <div class="updated" id="updatedAt"></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('history')">📋 叫貨記錄</button>
+    <button class="tab" onclick="switchTab('predict')">🔮 補貨預測</button>
+  </div>
+
+  <!-- 叫貨記錄 -->
+  <div id="tabHistory">
+    <div class="summary-bar" id="sumBar"></div>
+    <div class="controls">
+      <label>客戶</label>
+      <select id="fC" onchange="renderHistory()"><option value="">全部</option></select>
+      <div class="sep"></div>
+      <label>商品</label>
+      <div class="search-select-wrap" id="productSearchWrap">
+        <input type="text" id="productSearch" placeholder="全部" autocomplete="off"
+          oninput="filterProductDropdown()"
+          onfocus="openProductDropdown()"
+          onblur="setTimeout(()=>closeProductDropdown(),150)">
+        <div class="search-dropdown" id="productDropdown"></div>
+      </div>
+      <div class="sep"></div>
+      <label>顯示</label>
+      <select id="fM" onchange="renderHistory()">
+        <option value="all">全部</option>
+        <option value="multi">有週期（多次下單）</option>
+        <option value="once">僅一次下單</option>
+      </select>
+    </div>
+    <div class="cards" id="historyCards"></div>
+  </div>
+
+  <!-- 補貨預測 -->
+  <div id="tabPredict" class="hidden">
+    <div class="summary-bar" id="predSumBar"></div>
+    <div class="controls">
+      <label>客戶</label>
+      <select id="pfC" onchange="renderPredict()"><option value="">全部</option></select>
+      <div class="sep"></div>
+      <label>只看</label>
+      <select id="pfM" onchange="renderPredict()">
+        <option value="all">全部有週期商品</option>
+        <option value="overdue">已逾期</option>
+        <option value="soon">7天內到期</option>
+        <option value="month">30天內到期</option>
+      </select>
+      <div class="sep"></div>
+      <button id="showSingleBtn" data-active="0" onclick="toggleSingle()" style="font-family:var(--sans);font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text2);cursor:pointer">顯示單組商品</button>
+    </div>
+    <div class="pred-grid" id="predCards"></div>
+  </div>
+</div>
 
 <script>
-const DATA = [{"customer":"VIP-加","product":"自動麻將桌椅情境組","entries":[["2025/12/02",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"VIP-正豐","product":"711情境組","entries":[["2025/11/21",30]],"gaps":[],"avg_gap":null,"total_qty":30},{"customer":"VIP-正豐","product":"Costco情境組","entries":[["2025/11/29",200]],"gaps":[],"avg_gap":null,"total_qty":200},{"customer":"VIP-正豐","product":"Lexus LM300情境組-白色","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"Lexus LM300情境組-黑色","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"勞斯萊斯 Phantom2025白色 情境組","entries":[["2025/11/28",15],["2026/04/13",15]],"gaps":[136],"avg_gap":136,"total_qty":30},{"customer":"VIP-正豐","product":"勞斯萊斯 Phantom2025黑色 情境組","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"咖啡機情境組","entries":[["2025/11/24",30]],"gaps":[],"avg_gap":null,"total_qty":30},{"customer":"VIP-正豐","product":"夜市情境組","entries":[["2025/11/24",30],["2026/04/13",15]],"gaps":[140],"avg_gap":140,"total_qty":45},{"customer":"VIP-正豐","product":"娃娃機扭蛋情境組","entries":[["2026/04/01",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"VIP-正豐","product":"家電情境組","entries":[["2026/04/13",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"私人飛機情境組","entries":[["2026/04/13",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"菜市場情境組","entries":[["2025/11/24",30]],"gaps":[],"avg_gap":null,"total_qty":30},{"customer":"VIP-正豐","product":"藍寶堅尼情境組 紅色","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"藍寶堅尼情境組 黃色","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"賓士G Class情境組-白色","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"賓士G Class情境組-黑色","entries":[["2025/11/28",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"運動酒吧情境組","entries":[["2026/04/13",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-正豐","product":"鄉村農田情境組","entries":[["2026/04/13",15]],"gaps":[],"avg_gap":null,"total_qty":15},{"customer":"VIP-觀得(vivi姐)","product":"股票機情境組","entries":[["2025/11/17",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"VVIP-萬萬","product":"沙發追劇KTV情境組","entries":[["2025/11/21",4]],"gaps":[],"avg_gap":null,"total_qty":4},{"customer":"VVIP-萬萬","product":"淑女車情境組","entries":[["2026/04/13",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"VVIP-萬萬","product":"蘋果3C情境組","entries":[["2026/04/13",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"Jog 125機車情境組","entries":[["2025/12/01",2]],"gaps":[],"avg_gap":null,"total_qty":2},{"customer":"vip-天羽","product":"保鏢情境組","entries":[["2025/11/20",2],["2025/11/24",2],["2025/12/01",1],["2025/12/05",2]],"gaps":[4,7,4],"avg_gap":5,"total_qty":7},{"customer":"vip-天羽","product":"勞斯萊斯 Phantom2025黑色 情境組","entries":[["2025/11/21",2]],"gaps":[],"avg_gap":null,"total_qty":2},{"customer":"vip-天羽","product":"夜市情境組","entries":[["2025/12/01",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"專櫃保養品情境組","entries":[["2025/11/20",2],["2025/11/21",3]],"gaps":[1],"avg_gap":1,"total_qty":5},{"customer":"vip-天羽","product":"招待所情境組","entries":[["2025/12/03",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"男士名錶情境組","entries":[["2025/12/07",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"男士盥洗情境組","entries":[["2026/03/31",2]],"gaps":[],"avg_gap":null,"total_qty":2},{"customer":"vip-天羽","product":"私人飛機情境組","entries":[["2025/12/01",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"耳鼻喉科情境組","entries":[["2025/12/01",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"自動麻將桌椅情境組","entries":[["2025/12/01",1],["2025/12/03",2]],"gaps":[2],"avg_gap":2,"total_qty":3},{"customer":"vip-天羽","product":"蘋果3C情境組","entries":[["2025/12/01",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"賓士G Class情境組-黑色","entries":[["2026/04/11",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"vip-天羽","product":"軍火槍械情境組","entries":[["2025/11/20",2],["2025/12/01",1],["2025/12/05",2]],"gaps":[11,4],"avg_gap":8,"total_qty":5},{"customer":"vip-天羽","product":"釣魚情境組","entries":[["2026/04/09",1]],"gaps":[],"avg_gap":null,"total_qty":1},{"customer":"萬萬發企業有限公司 蔡佩蓉","product":"蘋果3C情境組","entries":[["2026/04/28",2]],"gaps":[],"avg_gap":null,"total_qty":2}];
+const DATA_URL = 'https://raw.githubusercontent.com/timelesspaperart003/sheet-data/main/vip_orders.json';
+let ALL_DATA = [];
+let AUTH_HASHES = [];
+let selectedProduct = '';
+let currentTab = 'history';
 
-const customers = [...new Set(DATA.map(d=>d.customer))].sort();
-const products  = [...new Set(DATA.map(d=>d.product))].sort();
-const fC = document.getElementById('fC');
-const fP = document.getElementById('fP');
-customers.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; fC.appendChild(o); });
-products.forEach(p=>{ const o=document.createElement('option'); o.value=p; o.textContent=p; fP.appendChild(o); });
+// ===== 密碼驗證 =====
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
-function render() {
-  const cv = fC.value, pv = fP.value, mode = document.getElementById('fM').value;
-  let filtered = DATA.filter(r => {
-    if (cv && r.customer !== cv) return false;
-    if (pv && r.product !== pv) return false;
-    if (mode === 'multi' && !r.avg_gap) return false;
-    if (mode === 'once'  && r.avg_gap)  return false;
-    return true;
-  });
+async function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (!pw) return;
+  const hash = await sha256(pw);
+  if (AUTH_HASHES.includes(hash)) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    sessionStorage.setItem('vip_auth', hash);
+  } else {
+    document.getElementById('loginErr').textContent = '密碼錯誤，請再試一次';
+    document.getElementById('pwInput').value = '';
+  }
+}
 
-  filtered.sort((a,b) => {
-    if (a.avg_gap && !b.avg_gap) return -1;
-    if (!a.avg_gap && b.avg_gap) return 1;
-    if (a.avg_gap && b.avg_gap) return a.avg_gap - b.avg_gap;
-    return a.customer.localeCompare(b.customer);
-  });
+// ===== 商品搜尋下拉 =====
+let allProducts = [];
 
-  const totalQty = filtered.reduce((s,r)=>s+r.total_qty, 0);
-  const withCycle = filtered.filter(r=>r.avg_gap);
-  const avgCycle = withCycle.length ? Math.round(withCycle.reduce((s,r)=>s+r.avg_gap,0)/withCycle.length) : null;
+function buildProductDropdown(products) {
+  allProducts = ['', ...products];
+  renderProductOptions('');
+}
 
-  document.getElementById('sumBar').innerHTML = `
-    <div class="metric"><div class="lbl">品項數</div><div class="val">${filtered.length}</div></div>
-    <div class="metric"><div class="lbl">累積總叫貨量</div><div class="val">${totalQty.toLocaleString()}</div></div>
-    <div class="metric"><div class="lbl">有週期品項</div><div class="val">${withCycle.length}</div></div>
-    <div class="metric"><div class="lbl">平均補貨週期</div><div class="val">${avgCycle ? avgCycle+'天' : '—'}</div></div>
-  `;
-
+function renderProductOptions(keyword) {
+  const dd = document.getElementById('productDropdown');
+  const filtered = allProducts.filter(p => !keyword || p.includes(keyword));
   if (!filtered.length) {
-    document.getElementById('cards').innerHTML = '<div class="empty">無符合條件的資料</div>';
+    dd.innerHTML = '<div class="search-option no-result">無符合商品</div>';
     return;
   }
+  dd.innerHTML = filtered.map(p =>
+    `<div class="search-option${p===selectedProduct?' selected':''}" onmousedown="selectProduct('${p.replace(/'/g,"\\'")}')">${p || '全部'}</div>`
+  ).join('');
+}
 
-  const maxQty = Math.max(...filtered.flatMap(r=>r.entries.map(e=>e[1])));
+function filterProductDropdown() {
+  const kw = document.getElementById('productSearch').value;
+  renderProductOptions(kw);
+  openProductDropdown();
+}
 
-  document.getElementById('cards').innerHTML = filtered.map(r => {
-    let badge = '';
-    if (r.avg_gap && r.avg_gap <= 14)
-      badge = `<span class="cycle-badge cycle-hot">每 ${r.avg_gap} 天補貨</span>`;
-    else if (r.avg_gap)
-      badge = `<span class="cycle-badge cycle-normal">每 ${r.avg_gap} 天補貨</span>`;
-    else
-      badge = `<span class="cycle-badge cycle-once">僅一次</span>`;
+function openProductDropdown() {
+  renderProductOptions(document.getElementById('productSearch').value);
+  document.getElementById('productDropdown').classList.add('open');
+}
 
-    const rows = r.entries.map(([date, qty], i) => {
-      const gap = i > 0 ? r.gaps[i-1] : null;
-      const pct = Math.round((qty / maxQty) * 100);
-      const gapHtml = gap != null
-        ? `<span class="gap-tag">+${gap} 天</span>`
-        : `<span class="first-tag">首次</span>`;
-      return `<tr>
-        <td><span class="date-cell">${date}</span></td>
-        <td>
-          <div class="qty-cell">
-            <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
-            <span class="qty-num">${qty}</span>
-          </div>
-        </td>
-        <td>${gapHtml}</td>
-      </tr>`;
+function closeProductDropdown() {
+  document.getElementById('productDropdown').classList.remove('open');
+  // 如果輸入的不是有效選項，還原顯示
+  const inp = document.getElementById('productSearch');
+  if (!allProducts.includes(selectedProduct)) {
+    selectedProduct = '';
+    inp.value = '';
+  } else {
+    inp.value = selectedProduct || '';
+  }
+}
+
+function selectProduct(val) {
+  selectedProduct = val;
+  document.getElementById('productSearch').value = val || '';
+  document.getElementById('productSearch').placeholder = val ? '' : '全部';
+  closeProductDropdown();
+  renderHistory();
+}
+
+// ===== 資料處理 =====
+function parseDate(s) {
+  const m = String(s).match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (!m) return null;
+  return new Date(+m[1], +m[2]-1, +m[3]);
+}
+
+function buildData(rows) {
+  const header = rows[0], dataRows = rows.slice(1);
+  const itemCols = [];
+  header.forEach((h,i) => {
+    if (h.startsWith('品項') && !h.startsWith('品項備')) {
+      const num = h.replace('品項','');
+      const qi = header.indexOf('數量'+num);
+      if (qi!==-1) itemCols.push([i,qi]);
+    }
+  });
+  const dateCol = header.indexOf('下單日期'), custCol = header.indexOf('客戶名稱');
+  const records = [];
+  dataRows.forEach(row => {
+    const d = parseDate(row[dateCol]), c = String(row[custCol]||'').trim();
+    if (!d||!c) return;
+    itemCols.forEach(([ii,qi]) => {
+      const p = String(row[ii]||'').trim();
+      if (!p || /[*$改補修]/.test(p)) return;
+      const q = parseInt(row[qi]);
+      if (!isNaN(q)&&q>0) records.push({date:d,customer:c,product:p,qty:q});
+    });
+  });
+  const map = {};
+  records.forEach(r => { const k=`${r.customer}|||${r.product}|||${r.date.getTime()}`; map[k]=(map[k]||0)+r.qty; });
+  const tl = {};
+  Object.entries(map).forEach(([k,q]) => {
+    const [c,p,ts]=k.split('|||'), k2=`${c}|||${p}`;
+    if (!tl[k2]) tl[k2]=[];
+    tl[k2].push([new Date(+ts),q]);
+  });
+  const TODAY = new Date(2026,4,21);
+  const results = [];
+  Object.entries(tl).forEach(([k,entries]) => {
+    const [customer,product]=k.split('|||');
+    entries.sort((a,b)=>a[0]-b[0]);
+    const gaps=entries.slice(1).map((e,i)=>Math.round((e[0]-entries[i][0])/86400000));
+    const realGaps=gaps.filter(g=>g>0);
+    const avg_gap=realGaps.length?Math.round(realGaps.reduce((a,b)=>a+b,0)/realGaps.length):null;
+    const lastDate=entries[entries.length-1][0];
+    const daysSince=Math.round((TODAY-lastDate)/86400000);
+    const daysUntil=avg_gap?avg_gap-daysSince:null;
+    const urgency=avg_gap?Math.round(daysSince/avg_gap*100):0;
+    const fmt = d => d.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+    const nextDate=(avg_gap&&daysUntil!==null)?fmt(new Date(TODAY.getTime()+Math.max(0,daysUntil)*86400000)):null;
+    results.push({customer,product,entries:entries.map(([d,q])=>[fmt(d),q]),gaps,avg_gap,
+      total_qty:entries.reduce((s,[,q])=>s+q,0),last_date:fmt(lastDate),
+      last_qty:entries[entries.length-1][1],days_since:daysSince,days_until:daysUntil,urgency,next_date:nextDate});
+  });
+  results.sort((a,b)=>a.customer.localeCompare(b.customer)||a.product.localeCompare(b.product));
+  return results;
+}
+
+// ===== Tab =====
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='history')||(i===1&&tab==='predict')));
+  document.getElementById('tabHistory').classList.toggle('hidden', tab!=='history');
+  document.getElementById('tabPredict').classList.toggle('hidden', tab!=='predict');
+}
+
+// ===== 叫貨記錄 =====
+function renderHistory() {
+  const cv=document.getElementById('fC').value, pv=selectedProduct, mode=document.getElementById('fM').value;
+  let f=ALL_DATA.filter(r=>{
+    if (cv&&r.customer!==cv) return false;
+    if (pv&&r.product!==pv) return false;
+    if (mode==='multi'&&!r.avg_gap) return false;
+    if (mode==='once'&&r.avg_gap) return false;
+    return true;
+  });
+  f.sort((a,b)=>{
+    if (a.avg_gap&&!b.avg_gap) return -1;
+    if (!a.avg_gap&&b.avg_gap) return 1;
+    if (a.avg_gap&&b.avg_gap) return a.avg_gap-b.avg_gap;
+    return a.customer.localeCompare(b.customer);
+  });
+  const tq=f.reduce((s,r)=>s+r.total_qty,0), wc=f.filter(r=>r.avg_gap);
+  const ac=wc.length?Math.round(wc.reduce((s,r)=>s+r.avg_gap,0)/wc.length):null;
+  document.getElementById('sumBar').innerHTML=`
+    <div class="metric"><div class="lbl">品項數</div><div class="val">${f.length}</div></div>
+    <div class="metric"><div class="lbl">累積總叫貨量</div><div class="val">${tq.toLocaleString()}</div></div>
+    <div class="metric"><div class="lbl">有週期品項</div><div class="val">${wc.length}</div></div>
+    <div class="metric"><div class="lbl">平均補貨週期</div><div class="val">${ac?ac+'天':'—'}</div></div>`;
+  if (!f.length){document.getElementById('historyCards').innerHTML='<div class="empty">無符合條件的資料</div>';return;}
+  const mq=Math.max(...f.flatMap(r=>r.entries.map(e=>e[1])));
+  document.getElementById('historyCards').innerHTML=f.map(r=>{
+    const badge=r.avg_gap&&r.avg_gap<=14?`<span class="cbadge c-hot">每 ${r.avg_gap} 天</span>`:r.avg_gap?`<span class="cbadge c-normal">每 ${r.avg_gap} 天</span>`:`<span class="cbadge c-once">僅一次</span>`;
+    const trows=r.entries.map(([d,q],i)=>{
+      const g=i>0?r.gaps[i-1]:null, p=Math.round((q/mq)*100);
+      const gh=g!=null?`<span class="gtag">+${g} 天</span>`:`<span class="ftag">首次</span>`;
+      return `<tr><td><span class="dcel">${d}</span></td><td><div class="qcell"><div class="bar-wrap"><div class="bar-fill" style="width:${p}%"></div></div><span class="qnum">${q}</span></div></td><td>${gh}</td></tr>`;
     }).join('');
+    return `<div class="card"><div class="card-head"><span class="tag-c">${r.customer}</span><span class="pname">${r.product}</span>${badge}<span class="total-note">累計 ${r.total_qty} 組</span></div><table><thead><tr><th>下單日期</th><th>叫貨量</th><th>距上次間隔</th></tr></thead><tbody>${trows}</tbody></table></div>`;
+  }).join('');
+}
 
-    return `<div class="card">
-      <div class="card-head">
-        <span class="tag-customer">${r.customer}</span>
-        <span class="product-name">${r.product}</span>
-        ${badge}
-        <span class="total-note">累計 ${r.total_qty} 組</span>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>下單日期</th>
-            <th>叫貨量</th>
-            <th>距上次間隔</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
+// ===== 補貨預測 =====
+function toggleSingle() {
+  const btn = document.getElementById('showSingleBtn');
+  const active = btn.dataset.active === '1';
+  btn.dataset.active = active ? '0' : '1';
+  btn.style.background = active ? 'var(--surface)' : 'var(--accent-light)';
+  btn.style.color = active ? 'var(--text2)' : 'var(--accent)';
+  btn.style.borderColor = active ? 'var(--border)' : 'var(--accent-mid)';
+  btn.textContent = active ? '顯示單組商品' : '隱藏單組商品';
+  renderPredict();
+}
+
+function setPredMode(mode) {
+  document.getElementById('pfM').value = mode;
+  renderPredict();
+}
+
+function renderPredict() {
+  const cv=document.getElementById('pfC').value, mode=document.getElementById('pfM').value;
+  const showSingle = document.getElementById('showSingleBtn').dataset.active === '1';
+  let f=ALL_DATA.filter(r=>{
+    if (!r.avg_gap) return false;
+    if (cv&&r.customer!==cv) return false;
+    if (!showSingle && Math.max(...r.entries.map(e=>e[1])) <= 1) return false;
+    if (mode==='overdue'&&r.days_until>=0) return false;
+    if (mode==='soon'&&(r.days_until<0||r.days_until>7)) return false;
+    if (mode==='month'&&(r.days_until<0||r.days_until>30)) return false;
+    return true;
+  });
+  f.sort((a,b)=>b.urgency-a.urgency);
+  const allWithCycle=ALL_DATA.filter(r=>r.avg_gap&&(!cv||r.customer===cv)&&(showSingle||Math.max(...r.entries.map(e=>e[1]))>1));
+  const overdue=allWithCycle.filter(r=>r.days_until<0).length;
+  const soon7=allWithCycle.filter(r=>r.days_until>=0&&r.days_until<=7).length;
+  const soon30=allWithCycle.filter(r=>r.days_until>7&&r.days_until<=30).length;
+  const curMode=document.getElementById('pfM').value;
+  document.getElementById('predSumBar').innerHTML=`
+    <div class="metric clickable${curMode==='all'?' active':''}" onclick="setPredMode('all')"><div class="lbl">有週期商品</div><div class="val">${allWithCycle.length}</div></div>
+    <div class="metric clickable${curMode==='overdue'?' active':''}" onclick="setPredMode('overdue')"><div class="lbl" style="color:var(--red)">已逾期</div><div class="val" style="color:var(--red)">${overdue}</div></div>
+    <div class="metric clickable${curMode==='soon'?' active':''}" onclick="setPredMode('soon')"><div class="lbl" style="color:var(--warn)">7天內到期</div><div class="val" style="color:var(--warn)">${soon7}</div></div>
+    <div class="metric clickable${curMode==='month'?' active':''}" onclick="setPredMode('month')"><div class="lbl">30天內到期</div><div class="val">${soon30}</div></div>`;
+  if (!f.length){document.getElementById('predCards').innerHTML='<div class="empty">無符合條件的資料</div>';return;}
+  document.getElementById('predCards').innerHTML=f.map((r,i)=>{
+    const isOverdue=r.days_until<0, isSoon=!isOverdue&&r.days_until<=7;
+    const cardClass=isOverdue?'pred-card overdue':isSoon?'pred-card soon':'pred-card';
+    const urgPct=Math.min(r.urgency,100), urgColor=r.urgency>=100?'#b83232':r.urgency>=70?'#c77a2a':'#74c69d';
+    const urgLabel=isOverdue?`<span class="urgency-label" style="color:var(--red)">逾期 ${Math.abs(r.days_until)} 天</span>`:`<span class="urgency-label" style="color:${urgColor}">${r.days_until} 天後</span>`;
+    return `<div class="${cardClass}">
+      <div class="pred-rank">#${i+1}</div>
+      <div class="pred-info"><div><span class="pred-customer">${r.customer}</span></div><div class="pred-product">${r.product}</div><div class="pred-meta">距上次 ${r.days_since} 天 / 週期 ${r.avg_gap} 天</div></div>
+      <div class="pred-qty">預估 ${r.last_qty} 組</div>
+      <div class="pred-next">${r.next_date?'預測：'+r.next_date:''}</div>
+      <div class="urgency-wrap">${urgLabel}<div class="urgency-bar-bg"><div class="urgency-bar-fill" style="width:${urgPct}%;background:${urgColor}"></div></div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">${r.urgency}%</div></div>
     </div>`;
   }).join('');
 }
 
-render();
+// ===== 初始化 =====
+async function init() {
+  try {
+    const res = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+
+    // 讀取密碼 hash
+    AUTH_HASHES = json._auth?.hashes || [];
+
+    // 檢查 sessionStorage 是否已登入
+    const cached = sessionStorage.getItem('vip_auth');
+    if (cached && AUTH_HASHES.includes(cached)) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainScreen').style.display = 'block';
+    }
+
+    const sheet = json['客戶下單記錄'];
+    if (!sheet) throw new Error('找不到工作表資料');
+    ALL_DATA = buildData(sheet.rows);
+
+    const customers = [...new Set(ALL_DATA.map(d=>d.customer))].sort();
+    const products  = [...new Set(ALL_DATA.map(d=>d.product))].sort();
+
+    ['fC','pfC'].forEach(id=>{
+      const sel=document.getElementById(id);
+      customers.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o)});
+    });
+
+    buildProductDropdown(products);
+    document.getElementById('updatedAt').textContent = '資料更新：' + sheet.updatedAt;
+    renderHistory();
+    renderPredict();
+  } catch(err) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    document.getElementById('mainScreen').innerHTML = `<div class="error" style="margin:4rem auto">⚠ 資料載入失敗：${err.message}<br>請先執行 GAS 的 pushToGitHub 後重新整理。</div>`;
+  }
+}
+init();
 </script>
 </body>
 </html>
